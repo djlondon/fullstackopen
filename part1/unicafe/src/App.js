@@ -5,7 +5,10 @@ const Button = (props) => {
 }
 
 const StatisticsLine = ({ text, value }) => (
-  <p>{text} {value}</p>
+  <tr>
+    <td>{text}</td>
+    <td>{value}</td>
+  </tr>
 )
 
 const Statistics = ({ states, results }) => {
@@ -18,12 +21,14 @@ const Statistics = ({ states, results }) => {
     return <p>No feeback given</p>
   } else {
     return (
-    <div>
-      {stats}
-      <StatisticsLine text="all" value={results.length} />
-      <StatisticsLine text="average" value={sum / results.length} />
-      <StatisticsLine text="positive" value={pos / results.length * 100 + "%"} />
-    </div>)
+      <table>
+        <tbody>
+          {stats}
+          <StatisticsLine text="all" value={results.length} />
+          <StatisticsLine text="average" value={sum / results.length} />
+          <StatisticsLine text="positive" value={pos / results.length * 100 + "%"} />
+        </tbody>
+      </table>)
   }
 }
 
