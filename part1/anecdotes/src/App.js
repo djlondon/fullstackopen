@@ -30,7 +30,14 @@ const App = () => {
     setVote(copy)
   }
 
-  const handleNext = () => setSelected(getRandomInt(anecdotes.length - 1))
+  const handleNext = () => {
+    let lastSelected = selected
+    while (lastSelected === selected) {
+      console.log(lastSelected)
+      lastSelected = getRandomInt(anecdotes.length - 1)
+    }
+    setSelected(lastSelected)
+}
   const mostVotes = anecdotes[votes.indexOf(Math.max(...votes))]
 
   return (
