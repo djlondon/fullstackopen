@@ -33,7 +33,6 @@ const App = () => {
   const handleNext = () => {
     let lastSelected = selected
     while (lastSelected === selected) {
-      console.log(lastSelected)
       lastSelected = getRandomInt(anecdotes.length - 1)
     }
     setSelected(lastSelected)
