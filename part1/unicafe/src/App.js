@@ -5,17 +5,21 @@ const Button = (props) => {
 }
 
 const Statistics = ({ states, results }) => {
-  const stats = states.map(v => 
+  const stats = states.map(v =>
     <p key={v.name}> {[v.name, v.state].join(" ")}</p>
   )
   const sum = results.reduce((v, acc) => v + acc, 0)
   const pos = results.filter(v => v === 1).length
-  return (<div>
-    {stats}
-    <p>all {results.length} </p>
-    <p>average {sum / results.length} </p>
-    <p>positive {pos / results.length * 100} %</p>
+  if (!results.length) {
+    return <p>No feeback given</p>
+  } else {
+    return (<div>
+      {stats}
+      <p>all {results.length} </p>
+      <p>average {sum / results.length} </p>
+      <p>positive {pos / results.length * 100} %</p>
     </div>)
+  }
 }
 
 const App = () => {
@@ -46,7 +50,7 @@ const App = () => {
       <h1>give feedback</h1>
       {buttons}
       <h1>statistics</h1>
-      <Statistics states={states} results={results}/>
+      <Statistics states={states} results={results} />
     </div>
   )
 }
