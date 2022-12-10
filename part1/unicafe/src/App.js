@@ -4,20 +4,25 @@ const Button = (props) => {
   return <button onClick={props.onClick}>{props.name}</button>
 }
 
+const StatisticsLine = ({ text, value }) => (
+  <p>{text} {value}</p>
+)
+
 const Statistics = ({ states, results }) => {
   const stats = states.map(v =>
-    <p key={v.name}> {[v.name, v.state].join(" ")}</p>
+    (<StatisticsLine key={v.name} text={v.name} value={v.state} />)
   )
   const sum = results.reduce((v, acc) => v + acc, 0)
   const pos = results.filter(v => v === 1).length
   if (!results.length) {
     return <p>No feeback given</p>
   } else {
-    return (<div>
+    return (
+    <div>
       {stats}
-      <p>all {results.length} </p>
-      <p>average {sum / results.length} </p>
-      <p>positive {pos / results.length * 100} %</p>
+      <StatisticsLine text="all" value={results.length} />
+      <StatisticsLine text="average" value={sum / results.length} />
+      <StatisticsLine text="positive" value={pos / results.length * 100 + "%"} />
     </div>)
   }
 }
