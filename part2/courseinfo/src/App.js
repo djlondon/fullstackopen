@@ -1,19 +1,27 @@
 import React from 'react'
 
-const Header = ({name}) => (
+const Header = ({ name }) => (
   <h1>{name}</h1>
 )
 
-const Part = ({part}) => (
+const Part = ({ part }) => (
   <p>{part.name} {part.exercises}</p>
 )
 
-const Course = ({course}) => (
-  <div>
+const Total = ({ total }) => (
+  <p><strong>total of {total} exercises</strong></p>
+)
+
+const Course = ({ course }) => {
+  const totalExercies = course.parts
+    .map(v => v.exercises)
+    .reduce((c, v) => (c + v), 0)
+  return (<div>
     <Header name={course.name} />
     {course.parts.map(v => <Part key={v.name} part={v} />)}
-  </div>
-)
+    <Total total={totalExercies} />
+  </div>)
+}
 
 
 const App = () => {
@@ -38,7 +46,7 @@ const App = () => {
       },
       {
         name: 'Functional',
-        exercises: 12,
+        exercises: 11,
         id: 4
       }
     ]
