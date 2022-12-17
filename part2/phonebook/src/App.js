@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import axios from 'axios'
 
 const Filter = ({ filterState }) => (
   <div>
@@ -37,23 +38,30 @@ const Persons = ({ persons, filterName }) => {
 }
 
 const App = () => {
-  const [persons, setPersons] = useState([
-    { name: 'Arto Hellas', number: '040-123456', id: 1 },
-    { name: 'Ada Lovelace', number: '39-44-5323523', id: 2 },
-    { name: 'Dan Abramov', number: '12-43-234345', id: 3 },
-    { name: 'Mary Poppendieck', number: '39-23-6423122', id: 4 }
-  ])
+  const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [newFilter, setNewFilter] = useState('')
-  const [id, setId] = useState(5)
+  const [id, setId] = useState(0)
+
+  useEffect(() => {
+    axios
+      .get('http://localhost:3001/persons')
+      .then(response => {
+        setPersons(response.data)
+        console.log("setting id to", response.data.length)
+        setId(response.data.length+1)
+      })
+  }, [])
 
   const addPerson = (event) => {
     event.preventDefault()
     if (persons.map(person => person.name).includes(newName)) {
       alert(`${newName} is already in the phonebook`)
     } else {
+      console.log("setting id to", id+1)
       setId(id + 1)
+      console.log("id", id)
       setPersons(persons.concat({ name: newName, number: newNumber, id: id }))
     }
     setNewName('')
