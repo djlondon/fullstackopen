@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios'
+import personService from './services/persons'
+import { PersonForm, Persons } from './components/Person'
 
 const Filter = ({ filterState }) => (
   <div>
@@ -7,66 +8,50 @@ const Filter = ({ filterState }) => (
   </div>
 )
 
-const PersonForm = ({ onSubmit, nameState, numberState }) => (
-  <form onSubmit={onSubmit}>
-    <div>
-      name: <input
-        value={nameState.val}
-        onChange={nameState.handler}
-      />
-    </div>
-    <div>number: <input
-      value={numberState.val}
-      onChange={numberState.handler}
-    />
-    </div>
-    <div>
-      <button type="submit">add</button>
-    </div>
-  </form>
-)
-
-const Person = ({ person }) => (
-  <li> {person.name} {person.number} </li>
-)
-
-const Persons = ({ persons, filterName }) => {
-  const personsToShow = filterName
-    ? persons.filter(person => person.name.toLocaleLowerCase().includes(filterName.toLocaleLowerCase()))
-    : persons
-  return personsToShow.map(person => <Person key={person.id} person={person} />)
-}
-
 const App = () => {
   const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [newFilter, setNewFilter] = useState('')
-  const [id, setId] = useState(0)
 
   useEffect(() => {
-    axios
-      .get('http://localhost:3001/persons')
-      .then(response => {
-        setPersons(response.data)
-        console.log("setting id to", response.data.length)
-        setId(response.data.length+1)
+    personService.getAll()
+      .then(ns => {
+        setPersons(ns)
+      })
+      .catch(error => {
+        console.log('fail')
       })
   }, [])
 
   const addPerson = (event) => {
     event.preventDefault()
-    if (persons.map(person => person.name).includes(newName)) {
-      alert(`${newName} is already in the phonebook`)
+    const existingPerson = persons.filter(person => person.name === newName)[0]
+    if (existingPerson) {
+      if (window.confirm(`${existingPerson.name} is already in the phonebook, would you like to update the number to ${newNumber}`)) {
+        personService.update(existingPerson.id, { ...existingPerson, number: newNumber })
+        .then((returnedPerson) => {
+          setPersons(persons.map(n => n.id !== existingPerson.id ? n : returnedPerson))
+        })
+      }
     } else {
-      console.log("setting id to", id+1)
-      setId(id + 1)
-      console.log("id", id)
-      setPersons(persons.concat({ name: newName, number: newNumber, id: id }))
+      personService.create({ name: newName, number: newNumber })
+        .then(returnedPerson => {
+          setPersons(persons.concat(returnedPerson))
+        })
     }
     setNewName('')
     setNewNumber('')
-  } 
+
+  }
+  const deletePerson = (id) => {
+    if (window.confirm(`Do you really want to delete ${persons.filter(n => n.id === id)[0].name}?`)) {
+      personService.remove(id)
+        .then((returnedNote) => {
+          setPersons(persons.filter(n => n.id !== id))
+        })
+    }
+  }
 
   const nameState = { val: newName, handler: (event) => setNewName(event.target.value) }
   const numberState = { val: newNumber, handler: (event) => setNewNumber(event.target.value) }
@@ -79,7 +64,7 @@ const App = () => {
       <h2>Add a new</h2>
       <PersonForm onSubmit={addPerson} nameState={nameState} numberState={numberState} />
       <h2>Numbers</h2>
-      <Persons persons={persons} filterName={newFilter} />
+      <Persons persons={persons} filterName={newFilter} deleteMethod={deletePerson} />
     </div>
   )
 }
