@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import personService from './services/persons'
 import { PersonForm, Persons } from './components/Person'
+import Notification from './components/Notification'
 
 const Filter = ({ filterState }) => (
   <div>
@@ -13,6 +14,8 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [newFilter, setNewFilter] = useState('')
+  const [infoMsg, setInfoMsg] = useState(null)
+  const [errorMsg, setErrorMsg] = useState(null)
 
   useEffect(() => {
     personService.getAll()
@@ -25,24 +28,34 @@ const App = () => {
   }, [])
 
   const addPerson = (event) => {
+    const notify = (success) => {
+      var msg = success ? `Added ${newName}` : `${newName} has already been removed.`
+      var f = success ? setInfoMsg : setErrorMsg
+      f(msg)
+      setTimeout(() => { f(null) }, 5000)
+    }
     event.preventDefault()
     const existingPerson = persons.filter(person => person.name === newName)[0]
     if (existingPerson) {
       if (window.confirm(`${existingPerson.name} is already in the phonebook, would you like to update the number to ${newNumber}`)) {
         personService.update(existingPerson.id, { ...existingPerson, number: newNumber })
-        .then((returnedPerson) => {
-          setPersons(persons.map(n => n.id !== existingPerson.id ? n : returnedPerson))
-        })
+          .then((returnedPerson) => {
+            setPersons(persons.map(n => n.id !== existingPerson.id ? n : returnedPerson))
+            notify(true)
+          })
+          .catch(error => {
+            notify(false)
+          })
       }
     } else {
       personService.create({ name: newName, number: newNumber })
         .then(returnedPerson => {
           setPersons(persons.concat(returnedPerson))
+          notify(true)
         })
     }
     setNewName('')
     setNewNumber('')
-
   }
   const deletePerson = (id) => {
     if (window.confirm(`Do you really want to delete ${persons.filter(n => n.id === id)[0].name}?`)) {
@@ -60,6 +73,8 @@ const App = () => {
   return (
     <div>
       <h1>Phonebook</h1>
+      <Notification message={infoMsg}/>
+      <Notification message={errorMsg} type='error' />
       <Filter filterState={filterState} />
       <h2>Add a new</h2>
       <PersonForm onSubmit={addPerson} nameState={nameState} numberState={numberState} />

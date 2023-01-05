@@ -1,12 +1,15 @@
 const Person = ({ person, deleteMethod }) => (
-    <li> {person.name} {person.number} <button onClick={() => deleteMethod(person.id)}>delete</button></li>
+    <li className='person'>
+        {person.name} {person.number}
+        <button onClick={() => deleteMethod(person.id)}>delete</button>
+    </li>
 )
 
 export const Persons = ({ persons, filterName, deleteMethod }) => {
     const personsToShow = filterName
         ? persons.filter(person => person.name.toLocaleLowerCase().includes(filterName.toLocaleLowerCase()))
         : persons
-    return personsToShow.map(person => <Person key={person.id} person={person} deleteMethod={deleteMethod}/>)
+    return personsToShow.map(person => <Person key={person.id} person={person} deleteMethod={deleteMethod} />)
 }
 
 export const PersonForm = ({ onSubmit, nameState, numberState }) => (
