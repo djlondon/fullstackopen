@@ -28,8 +28,10 @@ const App = () => {
   }, [])
 
   const addPerson = (event) => {
-    const notify = (success) => {
-      var msg = success ? `Added ${newName}` : `${newName} has already been removed.`
+    const notify = (msg, success) => {
+      if (success === undefined) {
+        success = true
+      }
       var f = success ? setInfoMsg : setErrorMsg
       f(msg)
       setTimeout(() => { f(null) }, 5000)
@@ -41,17 +43,20 @@ const App = () => {
         personService.update(existingPerson.id, { ...existingPerson, number: newNumber })
           .then((returnedPerson) => {
             setPersons(persons.map(n => n.id !== existingPerson.id ? n : returnedPerson))
-            notify(true)
+            notify(`Added ${newName}`)
           })
           .catch(error => {
-            notify(false)
+            notify(`${newName} has already been removed.`, false)
           })
       }
     } else {
       personService.create({ name: newName, number: newNumber })
         .then(returnedPerson => {
           setPersons(persons.concat(returnedPerson))
-          notify(true)
+          notify(`Added ${newName}`, false)
+        })
+        .catch(error => {
+          notify(error.response.data.error, false)
         })
     }
     setNewName('')
@@ -73,7 +78,7 @@ const App = () => {
   return (
     <div>
       <h1>Phonebook</h1>
-      <Notification message={infoMsg}/>
+      <Notification message={infoMsg} />
       <Notification message={errorMsg} type='error' />
       <Filter filterState={filterState} />
       <h2>Add a new</h2>
